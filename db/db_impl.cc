@@ -35,6 +35,8 @@
 
 namespace leveldb {
 
+extern double MaxBytesForLevel(const Options*, int);
+
 const int kNumNonTableCacheFiles = 10;
 
 // Information kept for every waiting writer
@@ -1403,9 +1405,9 @@ bool DBImpl::GetProperty(const Slice& property, std::string* value) {
   } else if (in == "stats") {
     char buf[200];
     snprintf(buf, sizeof(buf),
-             "                               Compactions\n"
-             "Level  Files Size(MB) Time(sec) Read(MB) Write(MB)\n"
-             "--------------------------------------------------\n"
+             "                                   Compactions\n"
+             "Level  Files Size(MB) Max(MB) Time(sec) Read(MB) Write(MB)\n"
+             "----------------------------------------------------------\n"
              );
     value->append(buf);
     for (int level = 0; level < config::kNumLevels; level++) {
@@ -1413,10 +1415,11 @@ bool DBImpl::GetProperty(const Slice& property, std::string* value) {
       if (stats_[level].micros > 0 || files > 0) {
         snprintf(
             buf, sizeof(buf),
-            "%3d %8d %8.0f %9.0f %8.0f %9.0f\n",
+            "%3d %8d %8.0f %7.0f %9.0f %8.0f %9.0f\n",
             level,
             files,
             versions_->NumLevelBytes(level) / 1048576.0,
+	    MaxBytesForLevel(&options_, level) / 1048576.0,
             stats_[level].micros / 1e6,
             stats_[level].bytes_read / 1048576.0,
             stats_[level].bytes_written / 1048576.0);

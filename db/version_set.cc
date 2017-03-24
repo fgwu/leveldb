@@ -18,6 +18,10 @@
 #include "util/coding.h"
 #include "util/logging.h"
 
+//#define LEVEL_RATIO 10
+#define LEVEL_RATIO 10
+
+
 namespace leveldb {
 
 static int TargetFileSize(const Options* options) {
@@ -27,7 +31,7 @@ static int TargetFileSize(const Options* options) {
 // Maximum bytes of overlaps in grandparent (i.e., level+2) before we
 // stop building a single file in a level->level+1 compaction.
 static int64_t MaxGrandParentOverlapBytes(const Options* options) {
-  return 10 * TargetFileSize(options);
+  return LEVEL_RATIO * TargetFileSize(options);
 }
 
 // Maximum number of bytes in all compacted files.  We avoid expanding
@@ -37,14 +41,14 @@ static int64_t ExpandedCompactionByteSizeLimit(const Options* options) {
   return 25 * TargetFileSize(options);
 }
 
-static double MaxBytesForLevel(const Options* options, int level) {
+double MaxBytesForLevel(const Options* options, int level) {
   // Note: the result for level zero is not really used since we set
   // the level-0 compaction threshold based on number of files.
 
   // Result for both level-0 and level-1
   double result = 10. * 1048576.0;
   while (level > 1) {
-    result *= 10;
+    result *= LEVEL_RATIO;
     level--;
   }
   return result;
