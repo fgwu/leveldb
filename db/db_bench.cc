@@ -75,8 +75,12 @@ static int FLAGS_value_size = 100;
 
 // Arrange to generate values that shrink to this fraction of
 // their original size after compression
-//static double FLAGS_compression_ratio = 0.5;
-static double FLAGS_compression_ratio = 1;
+static double FLAGS_compression_ratio = 0.5;
+
+// Level size ratio
+// AF default is ten
+// Added by Fenggang
+static double FLAGS_amplification_factor = 10;
 
 // Print histogram of operation timings
 static bool FLAGS_histogram = false;
@@ -341,6 +345,7 @@ class Benchmark {
     fprintf(stdout, "FileSize:   %.1f MB (estimated)\n",
             (((kKeySize + FLAGS_value_size * FLAGS_compression_ratio) * num_)
              / 1048576.0));
+    fprintf(stdout, "AmpFactor:  %.1f\n", FLAGS_amplification_factor);
     PrintWarnings();
     fprintf(stdout, "------------------------------------------------\n");
   }
@@ -719,6 +724,7 @@ class Benchmark {
     options.max_open_files = FLAGS_open_files;
     options.filter_policy = filter_policy_;
     options.reuse_logs = FLAGS_reuse_logs;
+    options.amplification_factor = FLAGS_amplification_factor;
     Status s = DB::Open(options, FLAGS_db, &db_);
     if (!s.ok()) {
       fprintf(stderr, "open error: %s\n", s.ToString().c_str());
@@ -969,6 +975,8 @@ int main(int argc, char** argv) {
       FLAGS_benchmarks = argv[i] + strlen("--benchmarks=");
     } else if (sscanf(argv[i], "--compression_ratio=%lf%c", &d, &junk) == 1) {
       FLAGS_compression_ratio = d;
+    } else if (sscanf(argv[i], "--amplification_factor=%lf%c", &d, &junk) == 1) {
+      FLAGS_amplification_factor = d;
     } else if (sscanf(argv[i], "--histogram=%d%c", &n, &junk) == 1 &&
                (n == 0 || n == 1)) {
       FLAGS_histogram = n;
