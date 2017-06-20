@@ -153,6 +153,11 @@ struct Options {
   // Default: NULL
   const FilterPolicy* filter_policy;
 
+  // the level to level size ratio.
+  // Added by Fenggang Wu
+  // Default: 10
+  double amplification_factor;
+
   // Create an Options object with default values for all fields.
   Options();
 };
