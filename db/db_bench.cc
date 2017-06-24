@@ -280,6 +280,13 @@ class Stats {
             extra.c_str());
     if (FLAGS_histogram) {
       fprintf(stdout, "Microseconds per op:\n%s\n", hist_.ToString().c_str());
+      fprintf(stdout, "Percentiles: "
+	      "P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
+	      hist_.Percentile(50.0),
+	      hist_.Percentile(75.0),
+	      hist_.Percentile(99.0),
+	      hist_.Percentile(99.9),
+	      hist_.Percentile(99.99));
     }
     fflush(stdout);
   }

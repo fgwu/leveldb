@@ -19,6 +19,7 @@ class Histogram {
   void Merge(const Histogram& other);
 
   std::string ToString() const;
+  double Percentile(double p) const;
 
  private:
   double min_;
@@ -32,7 +33,6 @@ class Histogram {
   double buckets_[kNumBuckets];
 
   double Median() const;
-  double Percentile(double p) const;
   double Average() const;
   double StandardDeviation() const;
 };
