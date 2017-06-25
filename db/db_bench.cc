@@ -984,6 +984,8 @@ int main(int argc, char** argv) {
       FLAGS_compression_ratio = d;
     } else if (sscanf(argv[i], "--amplification_factor=%lf%c", &d, &junk) == 1) {
       FLAGS_amplification_factor = d;
+    } else if (sscanf(argv[i], "--max_bytes_for_level_multiplier=%lf%c", &d, &junk) == 1) {
+      FLAGS_amplification_factor = d;
     } else if (sscanf(argv[i], "--histogram=%d%c", &n, &junk) == 1 &&
                (n == 0 || n == 1)) {
       FLAGS_histogram = n;
