@@ -14,6 +14,7 @@
 #include "port/port.h"
 #include "util/crc32c.h"
 #include "util/histogram.h"
+#include "util/amp_stats.h"
 #include "util/mutexlock.h"
 #include "util/random.h"
 #include "util/testutil.h"
@@ -188,6 +189,7 @@ class Stats {
   int64_t bytes_;
   double last_op_finish_;
   Histogram hist_;
+  //  AmpStats amp_stats_;
   std::string message_;
 
  public:
@@ -288,6 +290,9 @@ class Stats {
 	      hist_.Percentile(99.9),
 	      hist_.Percentile(99.99));
     }
+
+    //    fprintf(stdout, "Amp Stats: %s\n", amp_stats_.ToString().c_str());
+    
     fflush(stdout);
   }
 };
@@ -533,6 +538,8 @@ class Benchmark {
         HeapProfile();
       } else if (name == Slice("stats")) {
         PrintStats("leveldb.stats");
+      } else if (name == Slice("amp-stats")) {
+        PrintStats("leveldb.amp-stats");
       } else if (name == Slice("sstables")) {
         PrintStats("leveldb.sstables");
       } else {

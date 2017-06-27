@@ -14,6 +14,7 @@
 #include "table/format.h"
 #include "table/two_level_iterator.h"
 #include "util/coding.h"
+#include "util/amp_stats.h"
 
 namespace leveldb {
 
@@ -182,11 +183,20 @@ Iterator* Table::BlockReader(void* arg,
       EncodeFixed64(cache_key_buffer, table->rep_->cache_id);
       EncodeFixed64(cache_key_buffer+8, handle.offset());
       Slice key(cache_key_buffer, sizeof(cache_key_buffer));
+
+      Env* env_ = table->rep_->options.env;
+      AmpStats amp_stats = table->rep_->options.amp_stats;
+      double start = env_->NowMicros(), micros;
       cache_handle = block_cache->Lookup(key);
       if (cache_handle != NULL) {
         block = reinterpret_cast<Block*>(block_cache->Value(cache_handle));
+	micros = env_->NowMicros() - start;
+	amp_stats.Add(AmpStats::kCache, micros);
       } else {
         s = ReadBlock(table->rep_->file, options, handle, &contents);
+	micros = env_->NowMicros() - start;
+	amp_stats.Add(AmpStats::kDisk, micros);
+
         if (s.ok()) {
           block = new Block(contents);
           if (contents.cachable && options.fill_cache) {

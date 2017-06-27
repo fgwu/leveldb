@@ -6,6 +6,7 @@
 #define STORAGE_LEVELDB_INCLUDE_OPTIONS_H_
 
 #include <stddef.h>
+#include "util/amp_stats.h"
 
 namespace leveldb {
 
@@ -157,6 +158,10 @@ struct Options {
   // Added by Fenggang Wu
   // Default: 10
   double amplification_factor;
+
+  // Stats for all the amplification research
+  // Added by Fenggang Wu
+  AmpStats amp_stats;
 
   // Create an Options object with default values for all fields.
   Options();
