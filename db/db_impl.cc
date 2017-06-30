@@ -1151,6 +1151,7 @@ Status DBImpl::Get(const ReadOptions& options,
       micros = env_->NowMicros() - start;
       amp_stats_.Add(AmpStats::kTbl, micros);
     }
+    amp_stats_.AddReadCnt(stats.read_file_cnt);
     mutex_.Lock();
   }
 

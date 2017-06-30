@@ -69,6 +69,7 @@ class Version {
   struct GetStats {
     FileMetaData* seek_file;
     int seek_file_level;
+    int read_file_cnt;
   };
   Status Get(const ReadOptions&, const LookupKey& key, std::string* val,
              GetStats* stats);
