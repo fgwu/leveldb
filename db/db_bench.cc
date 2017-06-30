@@ -282,14 +282,7 @@ class Stats {
             extra.c_str());
     if (FLAGS_histogram) {
       fprintf(stdout, "Microseconds per op:\n%s\n", hist_.ToString().c_str());
-      fprintf(stdout, "Percentiles: "
-	      "P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
-	      hist_.Percentile(50.0),
-	      hist_.Percentile(75.0),
-	      hist_.Percentile(99.0),
-	      hist_.Percentile(99.9),
-	      hist_.Percentile(99.99));
-    }
+     }
 
     //    fprintf(stdout, "Amp Stats: %s\n", amp_stats_.ToString().c_str());
     
@@ -538,8 +531,8 @@ class Benchmark {
         HeapProfile();
       } else if (name == Slice("stats")) {
         PrintStats("leveldb.stats");
-      } else if (name == Slice("amp-stats")) {
-        PrintStats("leveldb.amp-stats");
+      } else if (name == Slice("amp_stats")) {
+        PrintStats("leveldb.amp_stats");
       } else if (name == Slice("sstables")) {
         PrintStats("leveldb.sstables");
       } else {

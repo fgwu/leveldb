@@ -1136,20 +1136,20 @@ Status DBImpl::Get(const ReadOptions& options,
     // First look in the memtable, then in the immutable memtable (if any).
     LookupKey lkey(key, snapshot);
     double start = env_->NowMicros(), micros;
-    AmpStats amp_stats = options_.amp_stats;
+    //    AmpStats amp_stats = options_.amp_stats;
     if (mem->Get(lkey, value, &s)) {
       // Done
       micros = env_->NowMicros() - start;
-      amp_stats.Add(AmpStats::kMem, micros);
+      amp_stats_.Add(AmpStats::kMem, micros);
     } else if (imm != NULL && imm->Get(lkey, value, &s)) {
       micros = env_->NowMicros() - start;
-      amp_stats.Add(AmpStats::kImm, micros);
+      amp_stats_.Add(AmpStats::kImm, micros);
       // Done
     } else {
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
       micros = env_->NowMicros() - start;
-      amp_stats.Add(AmpStats::kTbl, micros);
+      amp_stats_.Add(AmpStats::kTbl, micros);
     }
     mutex_.Lock();
   }
@@ -1451,8 +1451,8 @@ bool DBImpl::GetProperty(const Slice& property, std::string* value) {
              static_cast<unsigned long long>(total_usage));
     value->append(buf);
     return true;
-  } else if (in == "amp-stats") {
-    value->append(options_.amp_stats.ToString());
+  } else if (in == "amp_stats") {
+    value->append(amp_stats_.ToString());
     return true;
   }
 
