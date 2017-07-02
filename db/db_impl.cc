@@ -1136,22 +1136,22 @@ Status DBImpl::Get(const ReadOptions& options,
     // First look in the memtable, then in the immutable memtable (if any).
     LookupKey lkey(key, snapshot);
     double start = env_->NowMicros(), micros;
+    AmpStats::Type t;
     //    AmpStats amp_stats = options_.amp_stats;
     if (mem->Get(lkey, value, &s)) {
+      t = AmpStats::kMem;
       // Done
-      micros = env_->NowMicros() - start;
-      amp_stats_.Add(AmpStats::kMem, micros);
     } else if (imm != NULL && imm->Get(lkey, value, &s)) {
-      micros = env_->NowMicros() - start;
-      amp_stats_.Add(AmpStats::kImm, micros);
+      t = AmpStats::kImm;
       // Done
     } else {
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
-      micros = env_->NowMicros() - start;
-      amp_stats_.Add(AmpStats::kTbl, micros);
+      t = AmpStats::kTbl;
     }
-    amp_stats_.AddReadCnt(stats.read_file_cnt);
+    micros = env_->NowMicros() - start;
+    amp_stats_.Add(t, micros);
+    amp_stats_.AddReadCntLat(stats.read_file_cnt, micros);
     mutex_.Lock();
   }
 

@@ -18,8 +18,10 @@ AmpStats::AmpStats():
   read_lat_disk_cnt_(0)
 { 
   fprintf(stdout, "AmpStats init\n");
-  for (int i = 0; i < kNumReadCntLimit; i++)
+  for (int i = 0; i < kNumReadCntLimit; i++) {
     read_cnt_bucket_[i] = 0;
+    read_lat_bucket_[i] = 0;
+  }
 }
 
 AmpStats::~AmpStats() {
@@ -55,8 +57,9 @@ std::string AmpStats::ToString() const {
 
   long total_entry = 0;
   for (int i = 0; i < kNumReadCntLimit; i++) {
-    snprintf(buf, sizeof(buf), "#sst read %7d: %7d\n",
-	     i, read_cnt_bucket_[i]);
+    snprintf(buf, sizeof(buf), "#sst read %7d: %7d %10.3f\n",
+	     i, read_cnt_bucket_[i],
+	     read_lat_bucket_[i]/read_cnt_bucket_[i]);
     total_entry += read_cnt_bucket_[i];
     s.append(buf);
   }
@@ -94,9 +97,11 @@ void AmpStats::Add(AmpStats::Type t, double micros) {
   }
 }
 
-void AmpStats::AddReadCnt(int cnt) {
-  if (cnt >= 0 && cnt < kNumReadCntLimit)
-    read_cnt_bucket_[cnt]++;
-}
+  void AmpStats::AddReadCntLat(int cnt, double micros) {
+    if (cnt >= 0 && cnt < kNumReadCntLimit) {
+      read_cnt_bucket_[cnt]++;
+      read_lat_bucket_[cnt] += micros;
+    }
+  }
 
 }  // namespace leveldb
