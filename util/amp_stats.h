@@ -8,8 +8,7 @@ class AmpStats {
   ~AmpStats();
   std::string ToString() const;
   enum Type {kMem, kImm, kTbl, kCache, kDisk, kReadCnt};
-  void Add(Type, double);
-  void AddReadCntLat(int, double);
+  void AddReadLat(Type, double, int, int, bool);
 
  private:
   double read_lat_mem_;
@@ -24,8 +23,18 @@ class AmpStats {
   long read_lat_disk_cnt_;
 
   enum { kNumReadCntLimit = 30 };
-  int read_cnt_bucket_[kNumReadCntLimit];
-  double read_lat_bucket_[kNumReadCntLimit];
+  int sst_cnt_bucket_[kNumReadCntLimit];
+  int sst_cnt_bucket_success_[kNumReadCntLimit];
+  double sst_cnt_lat_bucket_[kNumReadCntLimit];
+
+  enum { kNumSeekLevelLimit = 10 };
+  int seek_level_bucket_[kNumSeekLevelLimit];
+  int seek_level_bucket_success_[kNumSeekLevelLimit];
+  double seek_level_lat_bucket_[kNumSeekLevelLimit];
+
+  void AddType(Type, double);
+  void AddReadCntLat(int, double, bool);
+  void AddSeekLevelLat(int, double, bool);
 };
 
 } // namespace leveldb

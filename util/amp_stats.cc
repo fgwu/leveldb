@@ -19,8 +19,15 @@ AmpStats::AmpStats():
 { 
   fprintf(stdout, "AmpStats init\n");
   for (int i = 0; i < kNumReadCntLimit; i++) {
-    read_cnt_bucket_[i] = 0;
-    read_lat_bucket_[i] = 0;
+    sst_cnt_bucket_[i] = 0;
+    sst_cnt_bucket_success_[i] = 0;
+    sst_cnt_lat_bucket_[i] = 0;
+  }
+
+  for (int i = 0; i < kNumSeekLevelLimit; i++) {
+    seek_level_bucket_[i] = 0;
+    seek_level_bucket_success_[i] = 0;
+    seek_level_lat_bucket_[i] = 0;
   }
 }
 
@@ -56,23 +63,64 @@ std::string AmpStats::ToString() const {
   s.append(buf);
 
   long total_entry = 0;
+  long total_found = 0;
+
+  snprintf(buf, sizeof(buf), "          %7s %7s %7s %7s %5s %10s\n"
+	     "----------------------------------------------------------\n",
+	   "", "found", "miss", "total", "miss%",  "avg_lat");
+  s.append(buf);
   for (int i = 0; i < kNumReadCntLimit; i++) {
-    snprintf(buf, sizeof(buf), "#sst read %7d: %7d %10.3f\n",
-	     i, read_cnt_bucket_[i],
-	     read_lat_bucket_[i]/read_cnt_bucket_[i]);
-    total_entry += read_cnt_bucket_[i];
+    int miss = sst_cnt_bucket_[i] - sst_cnt_bucket_success_[i];
+    snprintf(buf, sizeof(buf), "sst cnt   %7d:%7d %7d %7d %5.1f %10.3f\n",
+	     i, sst_cnt_bucket_success_[i], 
+	     miss,
+	     sst_cnt_bucket_[i],
+	     miss * 100.0/sst_cnt_bucket_[i],
+	     sst_cnt_lat_bucket_[i]/sst_cnt_bucket_[i]);
+    total_entry += sst_cnt_bucket_[i];
+    total_found += sst_cnt_bucket_success_[i];
     s.append(buf);
   }
+  snprintf(buf, sizeof(buf),   "total entries:    %7ld %7ld %7ld %5.1f\n",
+	   total_found, 
+	   total_entry - total_found,
+	   total_entry,
+	   (total_entry - total_found) * 100.0/total_entry);
+  s.append(buf);
 
-  snprintf(buf, sizeof(buf),   "total entrys:      %7ld\n",
-	   total_entry);
+
+  total_entry = 0;
+  total_found = 0;
+  snprintf(buf, sizeof(buf), "          %7s %7s %7s %7s %5s %10s\n"
+	     "----------------------------------------------------------\n",
+	   "", "found", "miss", "total", "miss%", "avg_lat");
+  s.append(buf);
+  for (int i = 0; i < kNumSeekLevelLimit; i++) {
+    int miss = seek_level_bucket_[i] - 
+      seek_level_bucket_success_[i];
+    snprintf(buf, sizeof(buf), "seek level%7d:%7d %7d %7d %5.1f %10.3f\n",
+	     i - 1, 
+	     seek_level_bucket_success_[i],
+	     miss,
+	     seek_level_bucket_[i],
+	     miss * 100.0/seek_level_bucket_[i],
+	     seek_level_lat_bucket_[i]/seek_level_bucket_[i]);
+    total_entry += seek_level_bucket_[i];
+    total_found += seek_level_bucket_success_[i];
+    s.append(buf);
+  }
+  snprintf(buf, sizeof(buf),   "total entries:    %7ld %7ld %7ld %5.1f\n",
+	   total_found, 
+	   total_entry - total_found,
+	   total_entry,
+	   (total_entry - total_found) * 100.0/total_entry);
   s.append(buf);
 
 
   return s;
 }
 
-void AmpStats::Add(AmpStats::Type t, double micros) {
+void AmpStats::AddType(AmpStats::Type t, double micros) {
   switch(t) {
   case kMem:
     read_lat_mem_ += micros;
@@ -97,11 +145,28 @@ void AmpStats::Add(AmpStats::Type t, double micros) {
   }
 }
 
-  void AmpStats::AddReadCntLat(int cnt, double micros) {
-    if (cnt >= 0 && cnt < kNumReadCntLimit) {
-      read_cnt_bucket_[cnt]++;
-      read_lat_bucket_[cnt] += micros;
-    }
-  }
+void AmpStats::AddReadCntLat(int cnt, 
+			     double micros, bool found) {
+    sst_cnt_bucket_[cnt]++;
+    if (found) sst_cnt_bucket_success_[cnt]++;
+    sst_cnt_lat_bucket_[cnt] += micros;
+}
+
+void AmpStats::AddSeekLevelLat(int seek_level, 
+			       double micros, bool found) {
+  // Note that seek_level starts from -1.
+  // so we shift the bucket by 1. 
+  // when prining out, we shift back. See ToString();
+    seek_level_bucket_[seek_level + 1]++;
+    if (found) seek_level_bucket_success_[seek_level + 1]++;
+    seek_level_lat_bucket_[seek_level + 1] += micros;
+}
+
+void AmpStats::AddReadLat(Type t, double micros, 
+			  int cnt, int seek_level, bool found) {
+  AddType(t, micros);
+  AddReadCntLat(cnt, micros, found);
+  AddSeekLevelLat(seek_level, micros, found);
+}
 
 }  // namespace leveldb
