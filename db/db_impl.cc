@@ -583,6 +583,10 @@ void DBImpl::CompactRange(const Slice* begin, const Slice* end) {
   }
 }
 
+AmpStats* DBImpl::GetAmpStats(){
+  return &amp_stats_;
+}
+
 void DBImpl::TEST_CompactRange(int level, const Slice* begin,const Slice* end) {
   assert(level >= 0);
   assert(level + 1 < config::kNumLevels);
@@ -1137,7 +1141,7 @@ Status DBImpl::Get(const ReadOptions& options,
     LookupKey lkey(key, snapshot);
     double start = env_->NowMicros(), micros;
     AmpStats::Type t;
-    //    AmpStats amp_stats = options_.amp_stats;
+
     if (mem->Get(lkey, value, &s)) {
       t = AmpStats::kMem;
       // Done
@@ -1150,7 +1154,9 @@ Status DBImpl::Get(const ReadOptions& options,
       t = AmpStats::kTbl;
     }
     micros = env_->NowMicros() - start;
-    amp_stats_.AddReadLat(t, micros, stats.read_file_cnt, 
+
+    options.amp_stats->AddType(t, micros);
+    options.amp_stats->AddReadLat(micros, stats.read_file_cnt, 
 			  stats.seek_file_level, s.ok());
     mutex_.Lock();
   }

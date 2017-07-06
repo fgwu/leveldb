@@ -175,6 +175,15 @@ Iterator* Table::BlockReader(void* arg,
   // We intentionally allow extra stuff in index_value so that we
   // can add more features in the future.
 
+  //      Env* env_ = table->rep_->options.env;
+  //      AmpStats amp_stats = table->rep_->options.amp_stats;
+  //      double start = env_->NowMicros(), micros;
+  Env* env_ = table->rep_->options.env;
+  // check whether amp_stats==null before call amp_stats 
+  // as BlockReader may have other calling paths.
+  AmpStats* amp_stats = options.amp_stats;
+  double start = env_->NowMicros(), micros;
+
   if (s.ok()) {
     BlockContents contents;
     if (block_cache != NULL) {
@@ -183,19 +192,17 @@ Iterator* Table::BlockReader(void* arg,
       EncodeFixed64(cache_key_buffer+8, handle.offset());
       Slice key(cache_key_buffer, sizeof(cache_key_buffer));
 
-      //      Env* env_ = table->rep_->options.env;
-      //      AmpStats amp_stats = table->rep_->options.amp_stats;
-      //      double start = env_->NowMicros(), micros;
       cache_handle = block_cache->Lookup(key);
       if (cache_handle != NULL) {
         block = reinterpret_cast<Block*>(block_cache->Value(cache_handle));
-	//	micros = env_->NowMicros() - start;
-	//	amp_stats.Add(AmpStats::kCache, micros);
+	micros = env_->NowMicros() - start;
+       	if (amp_stats)
+	  amp_stats->AddType(AmpStats::kCache, micros);
       } else {
         s = ReadBlock(table->rep_->file, options, handle, &contents);
-	//	micros = env_->NowMicros() - start;
-	//	amp_stats.Add(AmpStats::kDisk, micros);
-
+	micros = env_->NowMicros() - start;
+	if (amp_stats)
+	  amp_stats->AddType(AmpStats::kDisk, micros);
         if (s.ok()) {
           block = new Block(contents);
           if (contents.cachable && options.fill_cache) {
@@ -206,6 +213,8 @@ Iterator* Table::BlockReader(void* arg,
       }
     } else {
       s = ReadBlock(table->rep_->file, options, handle, &contents);
+      if(amp_stats) 
+	amp_stats->AddType(AmpStats::kDisk, micros);
       if (s.ok()) {
         block = new Block(contents);
       }

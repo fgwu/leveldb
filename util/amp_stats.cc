@@ -162,9 +162,8 @@ void AmpStats::AddSeekLevelLat(int seek_level,
     seek_level_lat_bucket_[seek_level + 1] += micros;
 }
 
-void AmpStats::AddReadLat(Type t, double micros, 
+void AmpStats::AddReadLat(double micros, 
 			  int cnt, int seek_level, bool found) {
-  AddType(t, micros);
   AddReadCntLat(cnt, micros, found);
   AddSeekLevelLat(seek_level, micros, found);
 }

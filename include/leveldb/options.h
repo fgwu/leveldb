@@ -6,7 +6,7 @@
 #define STORAGE_LEVELDB_INCLUDE_OPTIONS_H_
 
 #include <stddef.h>
-
+#include "util/amp_stats.h"
 namespace leveldb {
 
 class Cache;
@@ -185,10 +185,22 @@ struct ReadOptions {
   // Default: NULL
   const Snapshot* snapshot;
 
+  // Pointer to the amplification statistic collector struct
+  // by Fenggang
+  AmpStats *amp_stats;
+
   ReadOptions()
       : verify_checksums(false),
         fill_cache(true),
-        snapshot(NULL) {
+        snapshot(NULL), 
+        amp_stats(NULL) {
+  }
+
+  ReadOptions(AmpStats* as)
+      : verify_checksums(false),
+        fill_cache(true),
+        snapshot(NULL), 
+        amp_stats(as) {
   }
 };
 

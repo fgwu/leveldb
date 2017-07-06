@@ -1,5 +1,6 @@
 #ifndef STORAGE_LEVELDB_UTIL_AMP_STATS_H_
 #define STORAGE_LEVELDB_UTIL_AMP_STATS_H_
+#include <string>
 
 namespace leveldb {
 class AmpStats {
@@ -8,7 +9,8 @@ class AmpStats {
   ~AmpStats();
   std::string ToString() const;
   enum Type {kMem, kImm, kTbl, kCache, kDisk, kReadCnt};
-  void AddReadLat(Type, double, int, int, bool);
+  void AddReadLat(double, int, int, bool);
+  void AddType(Type, double);
 
  private:
   double read_lat_mem_;
@@ -32,7 +34,6 @@ class AmpStats {
   int seek_level_bucket_success_[kNumSeekLevelLimit];
   double seek_level_lat_bucket_[kNumSeekLevelLimit];
 
-  void AddType(Type, double);
   void AddReadCntLat(int, double, bool);
   void AddSeekLevelLat(int, double, bool);
 };

@@ -142,6 +142,13 @@ class DB {
   //    db->CompactRange(NULL, NULL);
   virtual void CompactRange(const Slice* begin, const Slice* end) = 0;
 
+
+  // The child class DBImpl will return the AmpStats struct.
+  // Fenggang
+  virtual AmpStats* GetAmpStats(){
+    return NULL;
+  };
+
  private:
   // No copying allowed
   DB(const DB&);

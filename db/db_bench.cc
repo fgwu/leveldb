@@ -786,7 +786,7 @@ class Benchmark {
   }
 
   void ReadSequential(ThreadState* thread) {
-    Iterator* iter = db_->NewIterator(ReadOptions());
+    Iterator* iter = db_->NewIterator(ReadOptions(db_->GetAmpStats()));
     int i = 0;
     int64_t bytes = 0;
     for (iter->SeekToFirst(); i < reads_ && iter->Valid(); iter->Next()) {
@@ -799,7 +799,7 @@ class Benchmark {
   }
 
   void ReadReverse(ThreadState* thread) {
-    Iterator* iter = db_->NewIterator(ReadOptions());
+    Iterator* iter = db_->NewIterator(ReadOptions(db_->GetAmpStats()));
     int i = 0;
     int64_t bytes = 0;
     for (iter->SeekToLast(); i < reads_ && iter->Valid(); iter->Prev()) {
@@ -812,7 +812,7 @@ class Benchmark {
   }
 
   void ReadRandom(ThreadState* thread) {
-    ReadOptions options;
+    ReadOptions options(db_->GetAmpStats());
     std::string value;
     int found = 0;
     for (int i = 0; i < reads_; i++) {
@@ -830,7 +830,7 @@ class Benchmark {
   }
 
   void ReadMissing(ThreadState* thread) {
-    ReadOptions options;
+    ReadOptions options(db_->GetAmpStats());
     std::string value;
     for (int i = 0; i < reads_; i++) {
       char key[100];
@@ -842,7 +842,7 @@ class Benchmark {
   }
 
   void ReadHot(ThreadState* thread) {
-    ReadOptions options;
+    ReadOptions options(db_->GetAmpStats());
     std::string value;
     const int range = (FLAGS_num + 99) / 100;
     for (int i = 0; i < reads_; i++) {
@@ -855,7 +855,7 @@ class Benchmark {
   }
 
   void SeekRandom(ThreadState* thread) {
-    ReadOptions options;
+    ReadOptions options(db_->GetAmpStats());
     int found = 0;
     for (int i = 0; i < reads_; i++) {
       Iterator* iter = db_->NewIterator(options);
