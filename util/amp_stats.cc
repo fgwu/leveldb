@@ -38,28 +38,28 @@ AmpStats::~AmpStats() {
 std::string AmpStats::ToString() const {
   std::string s = "";
   char buf[200];
-  snprintf(buf, sizeof(buf), "AmpStats:\nRead Lat Mem Avg: %.3f Cnt: %ld\n",
+  snprintf(buf, sizeof(buf), "AmpStats:\nRead Lat Mem   Avg: %7.3f Cnt: %12ld\n",
 	   read_lat_mem_/read_lat_mem_cnt_,
 	   read_lat_mem_cnt_);
   s.append(buf);
-  snprintf(buf, sizeof(buf), "Read Lat Imm Avg: %.3f Cnt: %ld\n",
+  snprintf(buf, sizeof(buf), "Read Lat Imm   Avg: %7.3f Cnt: %12ld\n",
 	   read_lat_imm_/read_lat_imm_cnt_,
 	   read_lat_imm_cnt_);
   s.append(buf);
-  snprintf(buf, sizeof(buf), "Read Lat Tbl Avg: %.3f Cnt: %ld\n",
+  snprintf(buf, sizeof(buf), "Read Lat Tbl   Avg: %7.3f Cnt: %12ld\n",
 	   read_lat_tbl_/read_lat_tbl_cnt_,
 	   read_lat_tbl_cnt_);
   s.append(buf);
-  snprintf(buf, sizeof(buf), "Read Lat Cache Avg: %.3f Cnt: %ld\n",
+  snprintf(buf, sizeof(buf), "Read Lat Cache Avg: %7.3f Cnt: %12ld\n",
 	   read_lat_cache_/read_lat_cache_cnt_,
 	   read_lat_cache_cnt_);
   s.append(buf);
-  snprintf(buf, sizeof(buf), "Read Lat Disk Avg: %.3f Cnt: %ld\n",
+  snprintf(buf, sizeof(buf), "Read Lat Disk  Avg: %7.3f Cnt: %12ld\n",
 	   read_lat_disk_/read_lat_disk_cnt_,
 	   read_lat_disk_cnt_);
   s.append(buf);
 
-  snprintf(buf, sizeof(buf), "Read File Cnt:\n");
+  snprintf(buf, sizeof(buf), "\n\nRead File Cnt:\n");
   s.append(buf);
 
   long total_entry = 0;
@@ -91,7 +91,7 @@ std::string AmpStats::ToString() const {
 
   total_entry = 0;
   total_found = 0;
-  snprintf(buf, sizeof(buf), "          %7s %7s %7s %7s %5s %10s\n"
+  snprintf(buf, sizeof(buf), "\n\n          %7s %7s %7s %7s %5s %10s\n"
 	     "----------------------------------------------------------\n",
 	   "", "found", "miss", "total", "miss%", "avg_lat");
   s.append(buf);
